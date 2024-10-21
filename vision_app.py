@@ -92,22 +92,6 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 
-# Inject custom JavaScript for requesting camera and audio permissions
-st.markdown("""
-    <script>
-        function requestPermissions() {
-            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                .then(function(stream) {
-                    console.log("Permissions granted");
-                })
-                .catch(function(err) {
-                    console.error("Permissions denied:", err);
-                });
-        }
-        requestPermissions();
-    </script>
-""", unsafe_allow_html=True)
-
 # Add SVG images and custom CSS for consistent appearance
 st.markdown("""
     <style>
@@ -145,20 +129,20 @@ st.markdown("""
        .st-emotion-cache-12fmjuu {
             display:none;
        }
-        st-emotion-cache-13ln4jf{
-            padding-top: 0rem;
-            padding-right: 1rem;
-            padding-bottom: 0rem;
-            padding-left: 1rem;
+      #total-box
+      .st-emotion-cache-13ln4jf {
+        width: 100%;
+        padding: 1rem 1rem 10rem;
+        max-width: 46rem;
         }
         
-        #smart-image-describer{
+      #smart-image-describer{
             padding-top: 3.25rem;
             padding-right: 0rem;
             padding-bottom: 2rem;
             padding-left: 0rem;
         }
-        .st-emotion-cache-khjqke{
+     .st-emotion-cache-khjqke{
             padding:2.375rem 0.75rem;
         }
     </style>
