@@ -41,14 +41,20 @@ st.markdown("""
     </script>
 """, unsafe_allow_html=True)
 
-# Add custom CSS for mobile optimization and to adjust camera input size
+# Add custom CSS for consistent appearance
 st.markdown("""
     <style>
+        body {
+            background-color: #ffffff; /* Set a consistent background color */
+            color: #333333; /* Set a consistent text color */
+        }
         .camera-permission-info {
-            background-color: #f9f9f9;
+            background-color: #f9f9f9; /* Light background for permission info */
+            color: #333333; /* Dark text color for contrast */
             padding: 10px;
             border-radius: 5px;
             margin: 10px 0;
+            border: 1px solid #ccc; /* Optional: Add a border for visibility */
         }
         .camera-container {
             width: 400px;  /* Adjust width */
@@ -58,8 +64,24 @@ st.markdown("""
             width: 100%; /* Makes the camera input full width */
             height: auto; /* Adjust height automatically */
         }
+        button {
+            background-color: #007BFF; /* Button background color */
+            color: white; /* Button text color */
+            border: none; /* Remove border */
+            border-radius: 5px; /* Round corners */
+            padding: 10px; /* Add padding */
+            cursor: pointer; /* Pointer cursor on hover */
+        }
+        button:hover {
+            background-color: #0056b3; /* Darker shade on hover */
+        }
+        .st-emotion-cache-khjqke {
+        line-height:5
+        }
+
     </style>
 """, unsafe_allow_html=True)
+
 
 class TTSManager:
     def __init__(self):
@@ -179,7 +201,7 @@ def image_to_text(client, model, base64_image, prompt):
     except Exception as e:
         st.error(f"Error generating description: {str(e)}")
         return None
-response=""
+
 def main():
     st.title("Smart Image Describer")
     
@@ -217,16 +239,16 @@ def main():
     col1, col2 = st.columns([1, 1])
     with col1:
         if st.button("📸 Regenerate Picture Description", use_container_width=True):
-            st.session_state.last_processed_image = None
             st.session_state.tts_manager.play_sound("button1.mp3")  # Play sound on click
+            st.session_state.last_processed_image = None            
             st.rerun()
-    
     
     with col2:
         if st.button("🔊 Replay Audio", use_container_width=True):
             if st.session_state.last_response:
-               st.session_state.tts_manager.create_audio_element(st.session_state.last_response)
                st.session_state.tts_manager.play_sound("button2.mp3")  # Different sound for replay
+               st.session_state.tts_manager.create_audio_element(st.session_state.last_response)
+               
 
 if __name__ == "__main__":
     main()
