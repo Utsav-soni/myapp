@@ -84,9 +84,9 @@ st.markdown("""
             color: #333333; /* Set a consistent text color */
         }
         #total-box
-        .st-emotion-cache-13ln4jf{
+        .stMainBlockContainer{
             width: 100%;
-            padding: 0rem 0rem 0rem; !important;
+            padding: 0; !important;
             max-width: 46rem;
         }
         .camera-permission-info {
