@@ -168,7 +168,19 @@ def main():
                 
                 # Generate and play audio description
                 audio_file_path = play_audio(response)
-                st.audio(audio_file_path, format='audio/mp3', start_time=0)  # Start audio playback
+                
+                # Embed an audio player and use JavaScript to play it automatically
+                st.audio(audio_file_path, format='audio/mp3', start_time=0)  # Display the audio player
+                
+                # JavaScript to autoplay audio
+                st.markdown(f"""
+                <script>
+                    var audio = new Audio('{audio_file_path}');
+                    audio.play().catch(function(error) {{
+                        console.error('Audio playback failed:', error);
+                    }});
+                </script>
+                """, unsafe_allow_html=True)
 
     # Retry option
     col1, col2 = st.columns([1, 1])
@@ -182,6 +194,7 @@ def main():
                 audio_file_path = play_audio(st.session_state.last_response)
                 st.audio(audio_file_path, format='audio/mp3', start_time=0)
 
-
 if __name__ == "__main__":
     main()
+
+
