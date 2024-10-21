@@ -119,7 +119,6 @@ Pygments==2.18.0
 pylibsrtp==0.10.0
 pyOpenSSL==24.2.1
 PyPika==0.48.9
-pypiwin32==223
 pyproject_hooks==1.2.0
 pyreadline3==3.5.4
 python-dateutil==2.9.0.post0
