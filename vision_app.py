@@ -35,6 +35,22 @@ def get_base64_of_bin_file(bin_file):
 logo_left_b64 = get_base64_of_bin_file('mark2.svg')
 logo_right_b64 = get_base64_of_bin_file('mark1.svg')
 
+
+# Add this right after your other st.markdown calls at the start of the main function
+st.markdown("""
+    <style>
+        /* Add some additional styles for mobile view if necessary */
+        @media only screen and (max-width: 600px) {
+            body {
+                width: 1024px; /* Width of the desktop view */
+                overflow-x: scroll; /* Allow horizontal scrolling */
+            }
+        }
+    </style>
+    <meta name="viewport" content="width=1024, initial-scale=1">
+""", unsafe_allow_html=True)
+
+
 st.markdown(f"""
     <style>
         
@@ -73,21 +89,6 @@ st.markdown(f"""
     <div class="svg-right">
         <img src="data:image/svg+xml;base64,{logo_right_b64}"> 
     </div>
-""", unsafe_allow_html=True)
-
-
-# Add this right after your other st.markdown calls at the start of the main function
-st.markdown("""
-    <style>
-        /* Add some additional styles for mobile view if necessary */
-        @media only screen and (max-width: 600px) {
-            body {
-                width: 1024px; /* Width of the desktop view */
-                overflow-x: scroll; /* Allow horizontal scrolling */
-            }
-        }
-    </style>
-    <meta name="viewport" content="width=1024, initial-scale=1">
 """, unsafe_allow_html=True)
 
 
