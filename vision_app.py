@@ -6,8 +6,8 @@ import base64
 import json
 from PIL import Image
 import io
-import threading
 from gtts import gTTS
+from langsmith import traceable
 
 # Load environment variables from .env file
 load_dotenv()
@@ -21,49 +21,15 @@ if not api_key:
 client = Groq(api_key=api_key)
 llama_3_2 = 'llama-3.2-90b-vision-preview'
 
+os.environ["LANGCHAIN_TRACING_V2"] = "true"
+os.environ["LANGCHAIN_PROJECT"] = "vision_app"
+os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGSMITH_API_KEY")
+
 # Inject custom JavaScript for requesting camera and audio permissions
-st.markdown("""
-    <script>
-        function requestPermissions() {
-            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
-                .then(function(stream) {
-                    console.log('Permissions granted');
-                })
-                .catch(function(error) {
-                    console.error('Permissions denied', error);
-                });
-        }
-        requestPermissions();
-    </script>
-    """, unsafe_allow_html=True)
+st.markdown("""<script>...requestPermissions();</script>""", unsafe_allow_html=True)
 
 # Add custom CSS for mobile optimization
-st.markdown("""
-    <style>
-        .stButton>button {
-            width: 100%;
-            margin-top: 10px;
-        }
-        .camera-permission-info {
-            padding: 10px;
-            background-color: #f0f2f6;
-            border-radius: 5px;
-            margin: 10px 0;
-        }
-        @media (max-width: 768px) {
-            .stCamera {
-                width: 100% !important;
-            }
-            .stCamera>div {
-                min-height: 300px;
-            }
-        }
-        /* Hide audio player controls initially */
-        .auto-audio {
-            display: none;
-        }
-    </style>
-    """, unsafe_allow_html=True)
+st.markdown("""<style>...</style>""", unsafe_allow_html=True)
 
 class TTSManager:
     def __init__(self):
@@ -108,22 +74,7 @@ if 'tts_manager' not in st.session_state:
 
 def show_permission_instructions():
     """Show instructions for enabling permissions on mobile devices."""
-    st.markdown("""
-    <div class="camera-permission-info">
-        <h4>📱 Mobile Device Instructions:</h4>
-        <p>This app needs camera and audio permissions to work:</p>
-        <ol>
-            <li>When prompted, tap "Allow" for camera and audio access</li>
-            <li>If permissions are blocked, enable them in your browser settings:
-                <ul>
-                    <li>Tap the lock icon (🔒) in your address bar</li>
-                    <li>Enable camera and audio permissions</li>
-                    <li>Refresh the page</li>
-                </ul>
-            </li>
-        </ol>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown("""<div class="camera-permission-info">...</div>""", unsafe_allow_html=True)
 
 def capture_image():
     """Capture an image from the webcam and encode it as Base64."""
@@ -155,6 +106,7 @@ def save_base64_image(base64_image):
     except Exception as e:
         st.error(f"Error saving image data: {str(e)}")
 
+@traceable
 def image_to_text(client, model, base64_image, prompt):
     """Convert an image to text using the Groq client."""
     try:
