@@ -141,6 +141,9 @@ st.markdown("""
             padding-bottom: 2rem;
             padding-left: 0rem;
         }
+        .st-emotion-cache-khjqke{
+            padding:2.375rem 0.75rem;
+        }
     </style>
 """, unsafe_allow_html=True)
 
