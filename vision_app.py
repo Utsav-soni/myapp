@@ -92,7 +92,7 @@ st.markdown("""
 
         .stMainBlockContainer .block-container .st-emotion-cache-13ln4jf .ea3mdgi5
         {
-          padding-top:0 rem !important;
+          padding-top:0 0 0 !important;
         }
         .camera-permission-info {
             background-color: #f9f9f9; /* Light background for permission info */
