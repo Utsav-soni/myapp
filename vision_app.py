@@ -35,21 +35,6 @@ logo_left_b64 = get_base64_of_bin_file('mark2.svg')
 logo_right_b64 = get_base64_of_bin_file('mark1.svg')
 
 
-# Add this right after your other st.markdown calls at the start of the main function
-st.markdown("""
-    <style>
-        /* Add some additional styles for mobile view if necessary */
-        @media only screen and (max-width: 600px) {
-            body {
-                width: 1024px; /* Width of the desktop view */
-                overflow-x: scroll; /* Allow horizontal scrolling */
-            }
-        }
-    </style>
-    <meta name="viewport" content="width=1024, initial-scale=1">
-""", unsafe_allow_html=True)
-
-
 st.markdown(f"""
     <style>
         
@@ -98,6 +83,12 @@ st.markdown("""
             background-color: #ffffff; /* Set a consistent background color */
             color: #333333; /* Set a consistent text color */
         }
+        #total-box
+        .st-emotion-cache-13ln4jf {
+            width: 100%;
+            padding: 1rem 1rem 10rem;
+            max-width: 46rem;
+        }
         .camera-permission-info {
             background-color: #f9f9f9; /* Light background for permission info */
             color: #333333; /* Dark text color for contrast */
@@ -128,12 +119,8 @@ st.markdown("""
        .st-emotion-cache-12fmjuu {
             display:none;
        }
-      #total-box
-      .st-emotion-cache-13ln4jf {
-        width: 100%;
-        padding: 1rem 1rem 10rem;
-        max-width: 46rem;
-        }
+       
+      
         
       #smart-image-describer{
             padding-top: 1.25rem;
