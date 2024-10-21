@@ -84,10 +84,10 @@ st.markdown("""
             color: #333333; /* Set a consistent text color */
         }
         #total-box
-        div.stMainBlockContainer{
-            width: 100%;
-            padding: 0; !important;
-            max-width: 46rem;
+         .st-emotion-cache-13ln4jf {
+            width: auto !important; /* Remove fixed width */
+            padding: 0 !important;  /* Remove padding */
+            /* Add any other styles you want to apply here */
         }
 
         .stMainBlockContainer .block-container .st-emotion-cache-13ln4jf .ea3mdgi5
