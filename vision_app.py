@@ -125,9 +125,9 @@ st.markdown("""
         button:hover {
             background-color: #0056b3; /* Darker shade on hover */
         }
-        [data-testid="stHeader"] {
-            display: none;
-        }
+       .st-emotion-cache-12fmjuu {
+            display:none;
+       }
         st-emotion-cache-13ln4jf{
             padding-top: 0rem;
             padding-right: 1rem;
