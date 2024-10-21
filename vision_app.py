@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 import base64
 import json
 from PIL import Image
-import pyttsx3
 import io
 import threading
+from gtts import gTTS
 
 # Load environment variables from .env file
 load_dotenv()
@@ -67,47 +67,30 @@ st.markdown("""
 
 class TTSManager:
     def __init__(self):
-        self.engine = None
         self.is_speaking = False
-        self._lock = threading.Lock()
 
-    def initialize_engine(self):
-        """Initialize or reinitialize the TTS engine."""
+    def generate_audio(self, text, filename="output.mp3"):
+        """Generate audio file from text using gTTS."""
         try:
-            if self.engine is not None:
-                self.engine.stop()
-                self.engine = None
-            self.engine = pyttsx3.init()
-            self.engine.setProperty('rate', 150)
-            self.engine.setProperty('volume', 1.0)
+            tts = gTTS(text=text, lang='en')
+            tts.save(filename)
             return True
-        except Exception as e:
-            st.error(f"Failed to initialize TTS engine: {str(e)}")
-            return False
-
-    def generate_audio(self, text, filename="output.wav"):
-        """Generate audio file from text."""
-        try:
-            if self.initialize_engine():
-                self.engine.save_to_file(text, filename)
-                self.engine.runAndWait()
-                return True
         except Exception as e:
             st.error(f"Error generating audio: {str(e)}")
         return False
 
     def create_audio_element(self, text):
-        """Create an auto-playing audio element with the generated audio."""
+        """Create an audio element with the generated audio."""
         if self.generate_audio(text):
             try:
-                with open("output.wav", "rb") as audio_file:
+                with open("output.mp3", "rb") as audio_file:
                     audio_bytes = audio_file.read()
                     audio_base64 = base64.b64encode(audio_bytes).decode()
                     
                     # Create audio element with autoplay
                     audio_html = f"""
                     <audio id="autoAudio" autoplay>
-                        <source src="data:audio/wav;base64,{audio_base64}" type="audio/wav">
+                        <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
                     </audio>
                     <script>
                         document.getElementById('autoAudio').play();
