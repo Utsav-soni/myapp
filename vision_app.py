@@ -86,7 +86,9 @@ st.markdown("""
         #total-box
         .st-emotion-cache-13ln4jf {
             width: 100%;
-            padding: 1rem 1rem 10rem;
+            padding-top: 1rem;
+            padding-right: 1rem;
+            padding-bottom: 10rem;
             max-width: 46rem;
         }
         .camera-permission-info {
@@ -119,8 +121,6 @@ st.markdown("""
        .st-emotion-cache-12fmjuu {
             display:none;
        }
-       
-      
         
       #smart-image-describer{
             padding-top: 1.25rem;
