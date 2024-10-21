@@ -83,11 +83,9 @@ st.markdown(f"""
             padding-left: 0px;
         }}
     </style>
-    <div class="svg-left">
-        <img src="data:image/svg+xml;base64,{logo_left_b64}"> 
-    </div>
-    <div class="svg-right">
-        <img src="data:image/svg+xml;base64,{logo_right_b64}"> 
+     <div style="text-align: center;">
+        <img src="data:image/svg+xml;base64,{logo_left_b64}" style="height: 69px; width: 93px; object-fit: contain; padding: 10px 0;">
+        <img src="data:image/svg+xml;base64,{logo_right_b64}" style="height: 60px; width: 187px; object-fit: contain; padding: 10px 0;">
     </div>
 """, unsafe_allow_html=True)
 
