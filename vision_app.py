@@ -60,13 +60,6 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-def play_audio(text):
-    """Generate audio using gTTS and play it in the browser."""
-    tts = gTTS(text, lang='en')
-    tts.save("response.mp3")
-    audio_file = open("response.mp3", "rb")
-    audio_bytes = audio_file.read()
-    st.audio(audio_bytes, format='audio/mp3')
 
 def show_permission_instructions():
     """Show instructions for enabling permissions on mobile devices."""
@@ -136,14 +129,18 @@ def image_to_text(client, model, base64_image, prompt):
     except Exception as e:
         st.error(f"Error generating description: {str(e)}")
         return None
+def play_audio(text):
+    """Generate audio using gTTS and return the audio file path."""
+    tts = gTTS(text, lang='en')
+    audio_file_path = "response.mp3"
+    tts.save(audio_file_path)
+    return audio_file_path
 
 def main():
     st.title("Smart Image Describer")
     
     # Add a brief introduction
-    st.markdown("""
-    📸 Take a picture and get an instant audio description!
-    """)
+    st.markdown("""📸 Take a picture and get an instant audio description!""")
 
     # Initialize session state
     if 'last_processed_image' not in st.session_state:
@@ -165,11 +162,12 @@ def main():
                 st.markdown("### Image Description:")
                 st.write(response)
                 
-                # Add audio playback notification
+                # Automatically play audio description
                 st.info("🔊 Playing audio description... Please ensure your volume is turned on.")
                 
-                # Play audio description using gTTS
-                play_audio(response)
+                # Generate and play audio description
+                audio_file_path = play_audio(response)
+                st.audio(audio_file_path, format='audio/mp3')
 
     # Retry option
     col1, col2 = st.columns([1, 1])
