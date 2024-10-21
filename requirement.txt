@@ -1,5 +1,5 @@
 streamlit
-groq
+groq==0.10..0
 dotenv
 base64
 json
