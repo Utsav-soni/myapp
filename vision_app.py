@@ -83,24 +83,16 @@ st.markdown("""
             background-color: #ffffff; /* Set a consistent background color */
             color: #333333; /* Set a consistent text color */
         }
-         .st-emotion-cache-13ln4jf, 
-        .st-emotion-cache-13ln4jf * {
+        
+        .st-emotion-cache-13ln4jf  {
             width: auto !important; /* Remove fixed width */
             padding: 0 !important;  /* Remove padding */
-            margin: 0 !important;   /* Remove margin if needed */
+           
             box-sizing: border-box; /* Ensure proper box sizing */
         }
-        #total-box
-         .st-emotion-cache-13ln4jf {
-            width: auto !important; /* Remove fixed width */
-            padding: 0 !important;  /* Remove padding */
-            /* Add any other styles you want to apply here */
-        }
+       
 
-        .stMainBlockContainer .block-container .st-emotion-cache-13ln4jf .ea3mdgi5
-        {
-          padding-top:0 0 0 !important;
-        }
+       
         .camera-permission-info {
             background-color: #f9f9f9; /* Light background for permission info */
             color: #333333; /* Dark text color for contrast */
