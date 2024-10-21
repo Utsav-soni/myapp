@@ -84,7 +84,7 @@ st.markdown("""
             color: #333333; /* Set a consistent text color */
         }
         #total-box
-        .stMainBlockContainer{
+        div.stMainBlockContainer{
             width: 100%;
             padding: 0; !important;
             max-width: 46rem;
