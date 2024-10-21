@@ -1,0 +1,7 @@
+streamlit
+groq
+dotenv
+base64
+json
+PIL
+pyttsx3
