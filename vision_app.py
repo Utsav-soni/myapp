@@ -83,6 +83,13 @@ st.markdown("""
             background-color: #ffffff; /* Set a consistent background color */
             color: #333333; /* Set a consistent text color */
         }
+         .st-emotion-cache-13ln4jf, 
+        .st-emotion-cache-13ln4jf * {
+            width: auto !important; /* Remove fixed width */
+            padding: 0 !important;  /* Remove padding */
+            margin: 0 !important;   /* Remove margin if needed */
+            box-sizing: border-box; /* Ensure proper box sizing */
+        }
         #total-box
          .st-emotion-cache-13ln4jf {
             width: auto !important; /* Remove fixed width */
