@@ -26,10 +26,40 @@ os.environ["LANGCHAIN_PROJECT"] = "vision_app"
 os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGSMITH_API_KEY")
 
 # Inject custom JavaScript for requesting camera and audio permissions
-st.markdown("""<script>...requestPermissions();</script>""", unsafe_allow_html=True)
+st.markdown("""
+    <script>
+        function requestPermissions() {
+            navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+                .then(function(stream) {
+                    console.log("Permissions granted");
+                })
+                .catch(function(err) {
+                    console.error("Permissions denied:", err);
+                });
+        }
+        requestPermissions();
+    </script>
+""", unsafe_allow_html=True)
 
-# Add custom CSS for mobile optimization
-st.markdown("""<style>...</style>""", unsafe_allow_html=True)
+# Add custom CSS for mobile optimization and to adjust camera input size
+st.markdown("""
+    <style>
+        .camera-permission-info {
+            background-color: #f9f9f9;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .camera-container {
+            width: 400px;  /* Adjust width */
+            margin: 0 auto; /* Center the camera input */
+        }
+        input[type="file"] {
+            width: 100%; /* Makes the camera input full width */
+            height: auto; /* Adjust height automatically */
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 class TTSManager:
     def __init__(self):
@@ -53,7 +83,6 @@ class TTSManager:
                     audio_bytes = audio_file.read()
                     audio_base64 = base64.b64encode(audio_bytes).decode()
                     
-                    # Create audio element with autoplay
                     audio_html = f"""
                     <audio id="autoAudio" autoplay>
                         <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
@@ -68,20 +97,44 @@ class TTSManager:
                 st.error(f"Error creating audio element: {str(e)}")
         return False
 
+    def play_sound(self, filename):
+        """Play a specific sound file."""
+        try:
+            with open(filename, "rb") as audio_file:
+                audio_bytes = audio_file.read()
+                audio_base64 = base64.b64encode(audio_bytes).decode()
+                
+                sound_html = f"""
+                <audio id="soundEffect" autoplay>
+                    <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
+                </audio>
+                <script>
+                    document.getElementById('soundEffect').play();
+                </script>
+                """
+                st.markdown(sound_html, unsafe_allow_html=True)
+                return True
+        except Exception as e:
+            st.error(f"Error playing sound: {str(e)}")
+        return False
+
 # Initialize TTS manager in session state
 if 'tts_manager' not in st.session_state:
     st.session_state.tts_manager = TTSManager()
 
 def show_permission_instructions():
     """Show instructions for enabling permissions on mobile devices."""
-    st.markdown("""<div class="camera-permission-info">...</div>""", unsafe_allow_html=True)
+    st.markdown("""<div class="camera-permission-info">Please allow camera and microphone permissions to use this feature.</div>""", unsafe_allow_html=True)
 
 def capture_image():
     """Capture an image from the webcam and encode it as Base64."""
     show_permission_instructions()
     
-    img_file = st.camera_input("Take a picture", help="Click to take a photo")
+    with st.container():  # Use a container to apply CSS
+        img_file = st.camera_input("Take a picture", help="Click to take a photo")
+    
     if img_file:
+        st.session_state.tts_manager.play_sound("camera.mp3")  # Play camera sound
         try:
             img = Image.open(img_file)
             img_bytes = io.BytesIO()
@@ -126,7 +179,7 @@ def image_to_text(client, model, base64_image, prompt):
     except Exception as e:
         st.error(f"Error generating description: {str(e)}")
         return None
-
+response=""
 def main():
     st.title("Smart Image Describer")
     
@@ -163,13 +216,18 @@ def main():
     # Retry option
     col1, col2 = st.columns([1, 1])
     with col1:
-        if st.button("📸 Take Another Picture", use_container_width=True):
+        if st.button("📸 Regenerate Picture Description", use_container_width=True):
             st.session_state.last_processed_image = None
+            st.session_state.tts_manager.play_sound("button1.mp3")  # Play sound on click
             st.rerun()
+    
+    
     with col2:
         if st.button("🔊 Replay Audio", use_container_width=True):
             if st.session_state.last_response:
-                st.session_state.tts_manager.create_audio_element(st.session_state.last_response)
+               st.session_state.tts_manager.create_audio_element(st.session_state.last_response)
+               st.session_state.tts_manager.play_sound("button2.mp3")  # Different sound for replay
 
 if __name__ == "__main__":
     main()
+
