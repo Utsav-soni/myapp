@@ -137,7 +137,7 @@ st.markdown("""
         }
         
       #smart-image-describer{
-            padding-top: 3.25rem;
+            padding-top: 1.25rem;
             padding-right: 0rem;
             padding-bottom: 2rem;
             padding-left: 0rem;
