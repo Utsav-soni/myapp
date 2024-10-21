@@ -84,7 +84,8 @@ st.markdown("""
             color: #333333; /* Set a consistent text color */
         }
         #total-box
-        .st-emotion-cache-13ln4jf {
+        #.st-emotion-cache-13ln4jf
+        .stMainBlockContainer{
             width: 100%;
             padding-top: 1rem;
             padding-right: 1rem;
