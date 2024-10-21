@@ -1,3 +1,4 @@
+
 import streamlit as st
 from groq import Groq
 import os
@@ -9,10 +10,10 @@ import io
 from gtts import gTTS
 from langsmith import traceable
 
-# Load environment variables from .env file
+# # Load environment variables from .env file
 load_dotenv()
 
-# Set up the API key for Groq
+# # Set up the API key for Groq
 api_key = os.getenv("GROQ_API_KEY")
 if not api_key:
     raise ValueError("API key not found. Please set GROQ_API_KEY environment variable.")
@@ -24,6 +25,55 @@ llama_3_2 = 'llama-3.2-90b-vision-preview'
 os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "vision_app"
 os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGSMITH_API_KEY")
+
+
+
+def get_base64_of_bin_file(bin_file):
+    with open(bin_file, 'rb') as f:
+        return base64.b64encode(f.read()).decode()
+
+logo_left_b64 = get_base64_of_bin_file('mark2.svg')
+logo_right_b64 = get_base64_of_bin_file('mark1.svg')
+
+st.markdown(f"""
+    <style>
+        
+        .svg-left {{
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }}
+        .svg-right {{
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }}
+        .svg-right img {{
+            height: 60px;
+            width: 187px;
+            object-fit: contain;
+            padding-top: 0px;
+            padding-right: 0px;
+            padding-bottom: 25px;
+            padding-left: 0px;
+        }}
+        .svg-left img {{
+            height: 69px;
+            width: 93px;
+            object-fit: contain;
+            padding-top: 0px;
+            padding-right: 0px;
+            padding-bottom: 33px;
+            padding-left: 0px;
+        }}
+    </style>
+    <div class="svg-left">
+        <img src="data:image/svg+xml;base64,{logo_left_b64}"> 
+    </div>
+    <div class="svg-right">
+        <img src="data:image/svg+xml;base64,{logo_right_b64}"> 
+    </div>
+""", unsafe_allow_html=True)
 
 # Inject custom JavaScript for requesting camera and audio permissions
 st.markdown("""
@@ -41,7 +91,7 @@ st.markdown("""
     </script>
 """, unsafe_allow_html=True)
 
-# Add custom CSS for consistent appearance
+# Add SVG images and custom CSS for consistent appearance
 st.markdown("""
     <style>
         body {
@@ -75,17 +125,25 @@ st.markdown("""
         button:hover {
             background-color: #0056b3; /* Darker shade on hover */
         }
-        .st-emotion-cache-khjqke {
-        line-height:5
+        [data-testid="stHeader"] {
+            display: none;
         }
-
-        .st-emotion-cache-bcargt {
-            line-height:5
+        st-emotion-cache-13ln4jf{
+            padding-top: 0rem;
+            padding-right: 1rem;
+            padding-bottom: 0rem;
+            padding-left: 1rem;
         }
-
-
+        
+        #smart-image-describer{
+            padding-top: 3.25rem;
+            padding-right: 0rem;
+            padding-bottom: 2rem;
+            padding-left: 0rem;
+        }
     </style>
 """, unsafe_allow_html=True)
+
 
 
 class TTSManager:
@@ -109,7 +167,7 @@ class TTSManager:
                 with open("output.mp3", "rb") as audio_file:
                     audio_bytes = audio_file.read()
                     audio_base64 = base64.b64encode(audio_bytes).decode()
-                    
+
                     audio_html = f"""
                     <audio id="autoAudio" autoplay>
                         <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
@@ -130,7 +188,7 @@ class TTSManager:
             with open(filename, "rb") as audio_file:
                 audio_bytes = audio_file.read()
                 audio_base64 = base64.b64encode(audio_bytes).decode()
-                
+
                 sound_html = f"""
                 <audio id="soundEffect" autoplay>
                     <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
@@ -156,10 +214,10 @@ def show_permission_instructions():
 def capture_image():
     """Capture an image from the webcam and encode it as Base64."""
     show_permission_instructions()
-    
+
     with st.container():  # Use a container to apply CSS
         img_file = st.camera_input("Take a picture", help="Click to take a photo")
-    
+
     if img_file:
         st.session_state.tts_manager.play_sound("camera.mp3")  # Play camera sound
         try:
@@ -180,7 +238,7 @@ def save_base64_image(base64_image):
     try:
         json_data = json.dumps({"image": base64_image})
         filename = 'output.txt'
-        
+
         with open(filename, 'w') as file:
             json.dump(json_data, file, indent=4)
     except Exception as e:
@@ -208,39 +266,43 @@ def image_to_text(client, model, base64_image, prompt):
         return None
 
 def main():
-    st.title("Smart Image Describer")
     
+
+  
+
+    st.markdown("<h1 style='text-align: center;'>Smart Image Describer</h1>", unsafe_allow_html=True)
+
     # Add a brief introduction
     st.markdown("""📸 Take a picture and get an instant audio description!""")
 
     # Initialize session state
     if 'last_processed_image' not in st.session_state:
         st.session_state.last_processed_image = None
-        
+
     if 'last_response' not in st.session_state:
         st.session_state.last_response = None
-    
+
     # Capture image
     base64_image = capture_image()
 
     # Only process if we have a new image
     if base64_image and base64_image != st.session_state.last_processed_image:
         st.session_state.last_processed_image = base64_image
-        
+
         prompt = "Describe this image smartly in 4-5 lines to the person who is completely unaware of the surroundings in a descriptive way."
-        
+
         with st.spinner("Generating description..."):
             response = image_to_text(client, llama_3_2, base64_image, prompt)
-            
+
             if response:
                 st.markdown("### Image Description:")
                 st.write(response)
                 st.session_state.last_response = response
-                
+
                 # Auto-generate and play audio
                 st.session_state.tts_manager.create_audio_element(response)
 
-    # Retry option
+    #     # Retry option
     col1, col2 = st.columns([1, 1])
     with col1:
         if st.button("📸 Regenerate Picture Description", use_container_width=True):
@@ -257,4 +319,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
