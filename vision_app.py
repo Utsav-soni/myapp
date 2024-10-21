@@ -79,6 +79,11 @@ st.markdown("""
         line-height:5
         }
 
+        .st-emotion-cache-bcargt {
+            line-height:5
+        }
+
+
     </style>
 """, unsafe_allow_html=True)
 
