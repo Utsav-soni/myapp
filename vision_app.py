@@ -8,7 +8,6 @@ from PIL import Image
 import pyttsx3
 import io
 import threading
-import time
 
 # Load environment variables from .env file
 load_dotenv()
@@ -239,4 +238,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
