@@ -89,6 +89,11 @@ st.markdown("""
             padding: 0; !important;
             max-width: 46rem;
         }
+
+        .stMainBlockContainer .block-container .st-emotion-cache-13ln4jf .ea3mdgi5
+        {
+          padding-top:0 rem !important;
+        }
         .camera-permission-info {
             background-color: #f9f9f9; /* Light background for permission info */
             color: #333333; /* Dark text color for contrast */
