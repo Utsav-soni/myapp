@@ -210,13 +210,8 @@ class TTSManager:
 if 'tts_manager' not in st.session_state:
     st.session_state.tts_manager = TTSManager()
 
-def show_permission_instructions():
-    """Show instructions for enabling permissions on mobile devices."""
-    st.markdown("""<div class="camera-permission-info">Please allow camera and microphone permissions to use this feature.</div>""", unsafe_allow_html=True)
-
 def capture_image():
     """Capture an image from the webcam and encode it as Base64."""
-    show_permission_instructions()
 
     with st.container():  # Use a container to apply CSS
         img_file = st.camera_input("Take a picture", help="Click to take a photo")
