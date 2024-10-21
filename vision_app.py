@@ -5,8 +5,10 @@ from dotenv import load_dotenv
 import base64
 import json
 from PIL import Image
-from gtts import gTTS
+import pyttsx3
 import io
+import threading
+import time
 
 # Load environment variables from .env file
 load_dotenv()
@@ -57,9 +59,70 @@ st.markdown("""
                 min-height: 300px;
             }
         }
+        /* Hide audio player controls initially */
+        .auto-audio {
+            display: none;
+        }
     </style>
     """, unsafe_allow_html=True)
 
+class TTSManager:
+    def __init__(self):
+        self.engine = None
+        self.is_speaking = False
+        self._lock = threading.Lock()
+
+    def initialize_engine(self):
+        """Initialize or reinitialize the TTS engine."""
+        try:
+            if self.engine is not None:
+                self.engine.stop()
+                self.engine = None
+            self.engine = pyttsx3.init()
+            self.engine.setProperty('rate', 150)
+            self.engine.setProperty('volume', 1.0)
+            return True
+        except Exception as e:
+            st.error(f"Failed to initialize TTS engine: {str(e)}")
+            return False
+
+    def generate_audio(self, text, filename="output.wav"):
+        """Generate audio file from text."""
+        try:
+            if self.initialize_engine():
+                self.engine.save_to_file(text, filename)
+                self.engine.runAndWait()
+                return True
+        except Exception as e:
+            st.error(f"Error generating audio: {str(e)}")
+        return False
+
+    def create_audio_element(self, text):
+        """Create an auto-playing audio element with the generated audio."""
+        if self.generate_audio(text):
+            try:
+                with open("output.wav", "rb") as audio_file:
+                    audio_bytes = audio_file.read()
+                    audio_base64 = base64.b64encode(audio_bytes).decode()
+                    
+                    # Create audio element with autoplay
+                    audio_html = f"""
+                    <audio id="autoAudio" autoplay>
+                        <source src="data:audio/wav;base64,{audio_base64}" type="audio/wav">
+                    </audio>
+                    <script>
+                        document.getElementById('autoAudio').play();
+                    </script>
+                    """
+                    st.markdown(audio_html, unsafe_allow_html=True)
+                    return True
+            except Exception as e:
+                st.error(f"Error creating audio element: {str(e)}")
+        return False
+
+# Initialize TTS manager in session state
+if 'tts_manager' not in st.session_state:
+    st.session_state.tts_manager = TTSManager()
 
 def show_permission_instructions():
     """Show instructions for enabling permissions on mobile devices."""
@@ -129,13 +192,6 @@ def image_to_text(client, model, base64_image, prompt):
     except Exception as e:
         st.error(f"Error generating description: {str(e)}")
         return None
-        
-def play_audio(text):
-    """Generate audio using gTTS and save it to a file."""
-    tts = gTTS(text, lang='en')
-    audio_file_path = "response.mp3"
-    tts.save(audio_file_path)
-    return audio_file_path
 
 def main():
     st.title("Smart Image Describer")
@@ -146,6 +202,9 @@ def main():
     # Initialize session state
     if 'last_processed_image' not in st.session_state:
         st.session_state.last_processed_image = None
+        
+    if 'last_response' not in st.session_state:
+        st.session_state.last_response = None
     
     # Capture image
     base64_image = capture_image()
@@ -162,25 +221,10 @@ def main():
             if response:
                 st.markdown("### Image Description:")
                 st.write(response)
+                st.session_state.last_response = response
                 
-                # Automatically play audio description
-                st.info("🔊 Playing audio description... Please ensure your volume is turned on.")
-                
-                # Generate and play audio description
-                audio_file_path = play_audio(response)
-                
-                # Embed an audio player and use JavaScript to play it automatically
-                st.audio(audio_file_path, format='audio/mp3', start_time=0)  # Display the audio player
-                
-                # JavaScript to autoplay audio
-                st.markdown(f"""
-                <script>
-                    var audio = new Audio('{audio_file_path}');
-                    audio.play().catch(function(error) {{
-                        console.error('Audio playback failed:', error);
-                    }});
-                </script>
-                """, unsafe_allow_html=True)
+                # Auto-generate and play audio
+                st.session_state.tts_manager.create_audio_element(response)
 
     # Retry option
     col1, col2 = st.columns([1, 1])
@@ -190,11 +234,11 @@ def main():
             st.rerun()
     with col2:
         if st.button("🔊 Replay Audio", use_container_width=True):
-            if hasattr(st.session_state, 'last_response'):
-                audio_file_path = play_audio(st.session_state.last_response)
-                st.audio(audio_file_path, format='audio/mp3', start_time=0)
+            if st.session_state.last_response:
+                st.session_state.tts_manager.create_audio_element(st.session_state.last_response)
 
 if __name__ == "__main__":
     main()
+
 
 
