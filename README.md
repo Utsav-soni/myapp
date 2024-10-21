@@ -34,31 +34,29 @@ Before running the application, ensure you have the following:
    ```bash
    pip install -r requirements.txt
 
-#**Installation**
+# **Installation**
 Clone this repository:
 
-##bash
+## bash
 git clone https://github.com/your-username/smart-vision.git
 cd smart-vision
 Create a .env file in the project root:
 
-##env
+## .env
 GROQ_API_KEY=your_groq_api_key
 LANGSMITH_API_KEY=your_langsmith_api_key
 Install the required Python packages:
 
-##bash
+## bash
 pip install -r requirements.txt
 Ensure the sound files (camera.mp3, button1.mp3, and button2.mp3) are placed in the project directory.
 
-##Usage
-Run the Streamlit app:
-
-bash
+## Usage
+Run the Streamlit app bash:
 streamlit run vision_app.py
 Open the browser link provided by Streamlit.
 
-#Instructions:
+# Instructions:
 
 Use the "Take a picture" button to capture an image using your webcam.
 A description of the image will be generated and read aloud automatically.
