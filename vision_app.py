@@ -8,11 +8,12 @@ from PIL import Image
 import io
 from gtts import gTTS
 from langsmith import traceable
+import time
 
-# # Load environment variables from .env file
+# Load environment variables from .env file
 load_dotenv()
 
-# # Set up the API key for Groq
+# Set up the API key for Groq
 api_key = os.getenv("GROQ_API_KEY")
 if not api_key:
     raise ValueError("API key not found. Please set GROQ_API_KEY environment variable.")
@@ -25,7 +26,15 @@ os.environ["LANGCHAIN_TRACING_V2"] = "true"
 os.environ["LANGCHAIN_PROJECT"] = "vision_app"
 os.environ["LANGCHAIN_API_KEY"] = os.getenv("LANGSMITH_API_KEY")
 
-
+# Initialize session state variables
+if 'last_response' not in st.session_state:
+    st.session_state.last_response = None
+if 'last_processed_image' not in st.session_state:
+    st.session_state.last_processed_image = None
+if 'description_visible' not in st.session_state:
+    st.session_state.description_visible = False
+if 'needs_audio_playback' not in st.session_state:
+    st.session_state.needs_audio_playback = False
 
 def get_base64_of_bin_file(bin_file):
     with open(bin_file, 'rb') as f:
@@ -34,10 +43,9 @@ def get_base64_of_bin_file(bin_file):
 logo_left_b64 = get_base64_of_bin_file('mark2.svg')
 logo_right_b64 = get_base64_of_bin_file('mark1.svg')
 
-
+# [Your existing CSS styling code remains the same]
 st.markdown(f"""
     <style>
-        
         .svg-left {{
             position: absolute;
             top: 10px;
@@ -75,72 +83,80 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
-
-# Add SVG images and custom CSS for consistent appearance
 st.markdown("""
     <style>
         body {
-            background-color: #ffffff; /* Set a consistent background color */
-            color: #333333; /* Set a consistent text color */
+            background-color: #ffffff;
+            color: #333333;
         }
         
         .st-emotion-cache-13ln4jf  {
-            width: auto !important; /* Remove fixed width */
-            padding: 0 !important;  /* Remove padding */
-           
-            box-sizing: border-box; /* Ensure proper box sizing */
+            width: auto !important;
+            padding: 0 !important;
+            box-sizing: border-box;
         }
-       
-
-       
+        
         .camera-permission-info {
-            background-color: #f9f9f9; /* Light background for permission info */
-            color: #333333; /* Dark text color for contrast */
+            background-color: #f9f9f9;
+            color: #333333;
             padding: 10px;
             border-radius: 5px;
             margin: 10px 0;
-            border: 1px solid #ccc; /* Optional: Add a border for visibility */
+            border: 1px solid #ccc;
         }
         .camera-container {
-            width: 400px;  /* Adjust width */
-            margin: 0 auto; /* Center the camera input */
+            width: 400px;
+            margin: 0 auto;
         }
         input[type="file"] {
-            width: 100%; /* Makes the camera input full width */
-            height: auto; /* Adjust height automatically */
+            width: 100%;
+            height: auto;
         }
         button {
-            background-color: #007BFF; /* Button background color */
-            color: white; /* Button text color */
-            border: none; /* Remove border */
-            border-radius: 5px; /* Round corners */
-            padding: 10px; /* Add padding */
-            cursor: pointer; /* Pointer cursor on hover */
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px;
+            cursor: pointer;
         }
         button:hover {
-            background-color: #0056b3; /* Darker shade on hover */
+            background-color: #0056b3;
         }
-       .st-emotion-cache-12fmjuu {
+        .st-emotion-cache-12fmjuu {
             display:none;
-       }
+        }
         
-      #smart-image-describer{
+        #smart-image-describer{
             padding-top: 1.25rem;
             padding-right: 0rem;
             padding-bottom: 2rem;
             padding-left: 0rem;
         }
-     .st-emotion-cache-khjqke{
+        .st-emotion-cache-khjqke{
             padding:2.375rem 0.75rem;
         }
     </style>
 """, unsafe_allow_html=True)
 
-
-
 class TTSManager:
     def __init__(self):
         self.is_speaking = False
+        self.current_audio = None
+
+    def stop_current_audio(self):
+        """Stop any currently playing audio."""
+        if self.current_audio:
+            st.markdown("""
+                <script>
+                    var audios = document.getElementsByTagName('audio');
+                    for(var i = 0; i < audios.length; i++){
+                        audios[i].pause();
+                        audios[i].currentTime = 0;
+                    }
+                </script>
+            """, unsafe_allow_html=True)
+            time.sleep(0.3)  # Small delay to ensure audio stops
 
     def generate_audio(self, text, filename="output.mp3"):
         """Generate audio file from text using gTTS."""
@@ -150,22 +166,27 @@ class TTSManager:
             return True
         except Exception as e:
             st.error(f"Error generating audio: {str(e)}")
-        return False
+            return False
 
-    def create_audio_element(self, text):
+    def create_audio_element(self, text, priority=False):
         """Create an audio element with the generated audio."""
+        self.stop_current_audio()
         if self.generate_audio(text):
             try:
                 with open("output.mp3", "rb") as audio_file:
                     audio_bytes = audio_file.read()
                     audio_base64 = base64.b64encode(audio_bytes).decode()
-
+                    
+                    volume = "1.0" if not priority else "1.5"
+                    
                     audio_html = f"""
                     <audio id="autoAudio" autoplay>
                         <source src="data:audio/mp3;base64,{audio_base64}" type="audio/mp3">
                     </audio>
                     <script>
-                        document.getElementById('autoAudio').play();
+                        var audio = document.getElementById('autoAudio');
+                        audio.volume = {volume};
+                        audio.play();
                     </script>
                     """
                     st.markdown(audio_html, unsafe_allow_html=True)
@@ -190,10 +211,11 @@ class TTSManager:
                 </script>
                 """
                 st.markdown(sound_html, unsafe_allow_html=True)
+                time.sleep(0.5)  # Wait for sound to complete
                 return True
         except Exception as e:
             st.error(f"Error playing sound: {str(e)}")
-        return False
+            return False
 
 # Initialize TTS manager in session state
 if 'tts_manager' not in st.session_state:
@@ -201,12 +223,11 @@ if 'tts_manager' not in st.session_state:
 
 def capture_image():
     """Capture an image from the webcam and encode it as Base64."""
-
-    with st.container():  # Use a container to apply CSS
+    with st.container():
         img_file = st.camera_input("Take a picture", help="Click to take a photo")
 
     if img_file:
-        st.session_state.tts_manager.play_sound("camera.mp3")  # Play camera sound
+        st.session_state.tts_manager.play_sound("camera.mp3")
         try:
             img = Image.open(img_file)
             img_bytes = io.BytesIO()
@@ -225,7 +246,6 @@ def save_base64_image(base64_image):
     try:
         json_data = json.dumps({"image": base64_image})
         filename = 'output.txt'
-
         with open(filename, 'w') as file:
             json.dump(json_data, file, indent=4)
     except Exception as e:
@@ -253,56 +273,52 @@ def image_to_text(client, model, base64_image, prompt):
         return None
 
 def main():
-    
-
-  
-
     st.markdown("<h1 style='text-align: center;'>Smart Vision 𓆩👁️𓆪</h1>", unsafe_allow_html=True)
-
-    # Add a brief introduction
     st.markdown("""📸 Take a picture and get an instant audio description!""")
-
-    # Initialize session state
-    if 'last_processed_image' not in st.session_state:
-        st.session_state.last_processed_image = None
-
-    if 'last_response' not in st.session_state:
-        st.session_state.last_response = None
 
     # Capture image
     base64_image = capture_image()
 
-    # Only process if we have a new image
+    # Clear previous description when a new image is captured
     if base64_image and base64_image != st.session_state.last_processed_image:
+        # Reset session variables for new description
         st.session_state.last_processed_image = base64_image
-
+        st.session_state.description_visible = False
+        st.session_state.last_response = None
+        
         prompt = "Describe this image smartly in 4-5 lines to the person who is completely unaware of the surroundings in a descriptive way."
 
         with st.spinner("Generating description..."):
             response = image_to_text(client, llama_3_2, base64_image, prompt)
-
+            
             if response:
-                st.markdown("### Image Description:")
-                st.write(response)
                 st.session_state.last_response = response
+                st.session_state.description_visible = True
+                time.sleep(0.5)  # Small delay before playing audio
+                st.session_state.tts_manager.create_audio_element(response, priority=True)
 
-                # Auto-generate and play audio
-                st.session_state.tts_manager.create_audio_element(response)
+    # Display only the latest description
+    if st.session_state.description_visible and st.session_state.last_response:
+        st.markdown("### Image Description:", unsafe_allow_html=True)
+        st.write(st.session_state.last_response)
 
-    #     # Retry option
+    # Buttons
     col1, col2 = st.columns([1, 1])
     with col1:
         if st.button("📸 Regenerate Picture Description", use_container_width=True):
-            st.session_state.tts_manager.play_sound("button1.mp3")  # Play sound on click
-            st.session_state.last_processed_image = None            
+            st.session_state.tts_manager.play_sound("button1.mp3")
+            time.sleep(0.5)
+            st.session_state.tts_manager.stop_current_audio()
+            st.session_state.last_processed_image = None
+            st.session_state.needs_audio_playback = True
             st.rerun()
     
     with col2:
         if st.button("🔊 Replay Audio", use_container_width=True):
             if st.session_state.last_response:
-               st.session_state.tts_manager.play_sound("button2.mp3")  # Different sound for replay
-               st.session_state.tts_manager.create_audio_element(st.session_state.last_response)
-               
+                st.session_state.tts_manager.play_sound("button2.mp3")
+                time.sleep(0.3)
+                st.session_state.tts_manager.create_audio_element(st.session_state.last_response)
 
 if __name__ == "__main__":
     main()
