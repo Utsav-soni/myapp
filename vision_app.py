@@ -75,6 +75,22 @@ st.markdown(f"""
     </div>
 """, unsafe_allow_html=True)
 
+
+# Add this right after your other st.markdown calls at the start of the main function
+st.markdown("""
+    <style>
+        /* Add some additional styles for mobile view if necessary */
+        @media only screen and (max-width: 600px) {
+            body {
+                width: 1024px; /* Width of the desktop view */
+                overflow-x: scroll; /* Allow horizontal scrolling */
+            }
+        }
+    </style>
+    <meta name="viewport" content="width=1024, initial-scale=1">
+""", unsafe_allow_html=True)
+
+
 # Inject custom JavaScript for requesting camera and audio permissions
 st.markdown("""
     <script>
