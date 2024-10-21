@@ -129,8 +129,9 @@ def image_to_text(client, model, base64_image, prompt):
     except Exception as e:
         st.error(f"Error generating description: {str(e)}")
         return None
+        
 def play_audio(text):
-    """Generate audio using gTTS and return the audio file path."""
+    """Generate audio using gTTS and save it to a file."""
     tts = gTTS(text, lang='en')
     audio_file_path = "response.mp3"
     tts.save(audio_file_path)
@@ -167,7 +168,7 @@ def main():
                 
                 # Generate and play audio description
                 audio_file_path = play_audio(response)
-                st.audio(audio_file_path, format='audio/mp3')
+                st.audio(audio_file_path, format='audio/mp3', start_time=0)  # Start audio playback
 
     # Retry option
     col1, col2 = st.columns([1, 1])
@@ -178,7 +179,9 @@ def main():
     with col2:
         if st.button("🔊 Replay Audio", use_container_width=True):
             if hasattr(st.session_state, 'last_response'):
-                play_audio(st.session_state.last_response)
+                audio_file_path = play_audio(st.session_state.last_response)
+                st.audio(audio_file_path, format='audio/mp3', start_time=0)
+
 
 if __name__ == "__main__":
     main()
