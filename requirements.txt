@@ -171,3 +171,4 @@ websockets==13.1
 wrapt==1.16.0
 yarl==1.9.4
 zipp==3.20.2
+gtts==2.2.3
