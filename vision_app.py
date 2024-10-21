@@ -1,4 +1,3 @@
-
 import streamlit as st
 from groq import Groq
 import os
@@ -274,7 +273,7 @@ def main():
 
   
 
-    st.markdown("<h1 style='text-align: center;'>Smart Image Describer</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>Smart Vision 𓆩 👁️ 𓆪</h1>", unsafe_allow_html=True)
 
     # Add a brief introduction
     st.markdown("""📸 Take a picture and get an instant audio description!""")
